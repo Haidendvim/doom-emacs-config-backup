@@ -63,7 +63,7 @@ brew install emacs git ripgrep fd cmake libtool
 
 ### One-Command Restoration
 ```bash
-git clone https://github.com/YOUR_USERNAME/doom-emacs-config-backup.git
+git clone https://github.com/Haidendvim/doom-emacs-config-backup.git
 cd doom-emacs-config-backup
 ./install.sh
 ```
