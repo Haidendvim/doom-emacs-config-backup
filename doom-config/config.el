@@ -9,6 +9,15 @@
   :config
   (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
 
+
+(setq initial-frame-alist
+      '((width . 310)    ;; Width in characters
+        (height . 80)    ;; Height in characters
+        (top . 50)       ;; Distance from top of screen in pixels
+        (left . 50)))    ;; Distance from left of screen in pixels
+;;
+;;
+
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 ;; (setq user-full-name "John Doe"
@@ -87,11 +96,29 @@
 
 ;; LSP Configuration for C/C++
 (after! lsp-mode
+  ;; Configure clangd with enhanced features
   (setq lsp-clients-clangd-args '("--header-insertion=never"
                                   "--clang-tidy"
-                                  "--completion-style=detailed"))
-  ;; Enable inlay hints for better code understanding
-  (setq lsp-inlay-hint-enable t))
+                                  "--completion-style=detailed"
+                                  "--function-arg-placeholders=false"
+                                  "--log=verbose"))
+  
+  ;; Enable features for better intellisense
+  (setq lsp-inlay-hint-enable t
+        lsp-enable-symbol-highlighting t
+        lsp-enable-on-type-formatting nil
+        lsp-signature-auto-activate t
+        lsp-signature-render-documentation t
+        lsp-completion-provider :none)  ; Use corfu instead
+  
+  ;; Auto-start LSP in C/C++ files
+  (setq lsp-auto-guess-root t
+        lsp-enable-snippet t
+        lsp-keep-workspace-alive nil)
+  
+  ;; Performance tuning
+  (setq lsp-idle-delay 0.1
+        lsp-log-io nil))
 
 ;; DAP (Debug Adapter Protocol) Configuration for C/C++
 (after! dap-mode
@@ -137,3 +164,29 @@
 ;; CMake integration
 (after! projectile
   (add-to-list 'projectile-project-root-files "CMakeLists.txt"))
+
+;; Tree-sitter configuration for better syntax highlighting
+(after! tree-sitter
+  ;; Enable tree-sitter for these modes
+  (add-to-list 'tree-sitter-major-mode-language-alist '(c-mode . c))
+  (add-to-list 'tree-sitter-major-mode-language-alist '(c++-mode . cpp))
+  
+  ;; Auto-enable tree-sitter for these modes
+  (add-hook 'c-mode-hook #'tree-sitter-mode)
+  (add-hook 'c++-mode-hook #'tree-sitter-mode)
+  (add-hook 'c-mode-hook #'tree-sitter-hl-mode)
+  (add-hook 'c++-mode-hook #'tree-sitter-hl-mode))
+
+;; Enable corfu for C/C++ completion (works with LSP)
+(after! corfu
+  (setq corfu-auto t
+        corfu-auto-delay 0.1
+        corfu-auto-prefix 1)
+  
+  ;; Enable corfu in the proper modes
+  (add-hook 'c-mode-hook #'corfu-mode)
+  (add-hook 'c++-mode-hook #'corfu-mode))
+
+;; Force LSP to start in C/C++ files
+(add-hook 'c-mode-hook #'lsp!)
+(add-hook 'c++-mode-hook #'lsp!)
